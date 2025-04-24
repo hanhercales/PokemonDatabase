@@ -309,3 +309,177 @@ INSERT INTO TienHoa VALUES
 ('P003', 'P023'), -- Bulbasaur -> Ivysaur
 ('P004', 'P024'), -- Pikachu -> Raichu
 ('P005', 'P025'); -- Eevee -> Vaporeon
+
+-- 1. Pokémon có CHISO > 60 --
+select * from POKEMON
+where CHISO > 60;
+
+-- 2. Chiêu thức có CHISO > 40 --
+select * from CHIEUTHUC
+where CHISO > 40;
+
+-- 3. Pokémon và hệ 'Electric' --
+select P.TENPOKEMON, H.TENHE
+from POKEMON P
+join POKEMON_HE PH on P.MAPOKEMON = PH.MAPOKEMON
+join HE H on PH.MAHE = H.MAHE
+where H.TENHE = 'Electric';
+
+-- 4. Pokémon có nội tại chứa 'Over' --
+select P.TENPOKEMON, N.TENNOITAI
+from POKEMON P
+join NOITAI N on P.MANOITAI = N.MANOITAI
+where N.TENNOITAI like '%Over%';
+
+-- 5. Huấn luyện viên có Pokémon độ hiếm >= 2 --
+select NHL.TENNHL, P.TENPOKEMON
+from NHAHUANLUYEN NHL
+join POKEBALL PB on NHL.MANHL = PB.MANHL
+join POKEMON P on PB.MAPOKEMON = P.MAPOKEMON
+where P.DOHIEM >= 2;
+
+-- 6. Đếm Pokémon theo độ hiếm (> 50) --
+select DOHIEM, count(*) as SOLUONG
+from POKEMON
+where CHISO > 50
+group by DOHIEM;
+
+-- 7. Đếm chiêu thức theo chỉ số >= 30 --
+select CHISO, count(*) as SOLUONGCHIEU
+from CHIEUTHUC
+where CHISO >= 30
+group by CHISO;
+
+-- 8. Đếm Pokémon theo hệ, chỉ hiện hệ có >1 Pokémon --
+select H.TENHE, count(*) as SOLUONGPOKEMON
+from POKEMON_HE PH
+join HE H on PH.MAHE = H.MAHE
+group by H.TENHE
+having count(*) > 1;
+
+-- 9. Đếm Pokémon theo độ hiếm, chỉ hiện độ hiếm có >1 Pokémon --
+select DOHIEM, count(*) as SOLUONG
+from POKEMON
+where CHISO > 40
+group by DOHIEM
+having count(*) > 1;
+
+-- 10. Đếm Pokémon mỗi huấn luyện viên, chỉ hiện ai có >= 2 Pokémon --
+select NHL.TENNHL, count(*) as SOLUONGPOKEMON
+from NHAHUANLUYEN NHL
+join POKEBALL PB on NHL.MANHL = PB.MANHL
+group by NHL.TENNHL
+having count(*) >= 2;
+
+--11.Đếm số lượng Pokemon mà mỗi nhà huấn luyện đang sở hữu,chỉ hiện những người
+--có Pokemon có độ hiếm từ 3 trở lên và sắp xếp theo thứ tự tổng số pokemon giảm dần 
+SELECT 
+    n.TenNHL AS 'Nhà huấn luyện',
+    COUNT(CASE WHEN p.DoHiem >= 3 THEN 1 END) AS 'Số Pokemon hiếm',
+    COUNT(p.MaPokemon) AS 'Tổng số Pokemon'
+FROM NhaHuanLuyen n
+JOIN PokeBall pb ON pb.MaNHL = n.MaNHL
+JOIN Pokemon p ON pb.MaPokemon = p.MaPokemon
+GROUP BY n.TenNHL
+HAVING COUNT(CASE WHEN p.DoHiem >= 3 THEN 1 END) > 0
+ORDER BY COUNT(p.MaPokemon) DESC;
+
+--12.Đếm số lượng Pokémon theo độ hiếm từ 2 trờ lên ,sắp xếp theo thứ tự giảm dần 
+SELECT DoHiem, COUNT(*) AS SoLuong
+FROM Pokemon
+WHERE DoHiem >= 2
+GROUP BY DoHiem
+HAVING COUNT(*) > 0
+ORDER BY SoLuong DESC;
+
+--13. Đếm số lượng Pokémon theo độ hiếm, chỉ lấy các độ hiếm có trung bình chỉ số lớn hơn mức trung bình chung
+SELECT DoHiem, COUNT(*) AS SoLuong
+FROM Pokemon
+WHERE ChiSo IS NOT Null
+GROUP BY DoHiem
+HAVING AVG(ChiSo) > (
+    SELECT AVG(ChiSo) FROM Pokemon
+);
+
+--14.Insert thêm hệ thường(normal)
+INSERT INTO He (MaHe, TenHe)
+VALUES ('HE011', 'Normal');
+--Kiểm tra 
+SELECT * FROM He;
+
+--15.Update hệ 1 số pokemon thuộc hệ thường 
+DELETE FROM Pokemon_He
+WHERE MaPokemon = 'P005' AND MaHe = 'HE006';
+UPDATE Pokemon_He
+SET MaHe = 'HE011'
+WHERE MaPokemon IN ('P005', 'P008', 'P009');
+--Kiểm tra 
+SELECT * FROM Pokemon_He;
+
+--16.Hiển thị các hệ có số Pokémon từ 2 trở lên và có chỉ số trung bình lớn hơn chí số trung bình tất cả các Pokémon.
+SELECT h.TenHe AS 'Hệ',
+       COUNT(ph.MaPokemon) AS 'Số Pokémon',
+       AVG(p.ChiSo) AS 'Chỉ số trung bình'
+FROM He h
+JOIN Pokemon_He ph ON h.MaHe = ph.MaHe
+JOIN Pokemon p ON p.MaPokemon = ph.MaPokemon
+WHERE p.DoHiem IS NOT NULL
+GROUP BY h.TenHe
+HAVING COUNT(ph.MaPokemon) >= 2
+   AND AVG(p.ChiSo) > (
+       SELECT AVG(ChiSo)
+       FROM Pokemon
+       WHERE ChiSo IS NOT Null
+   )
+ORDER BY [Chỉ số trung bình] DESC;
+
+--17.Insert nội tại Rock Head
+INSERT INTO NoiTai (MaNoiTai ,TenNoiTai ,MoTa)
+VALUES ('NT006' ,'Rock Head' ,'Protects the Pokémon from recoil damage');
+--Kiểm tra 
+SELECT * FROM NoiTai;
+
+--18.Update nội tại mới cho geodude và onix
+UPDATE Pokemon
+SET MaNoiTai = 'NT006'
+WHERE TenPokemon IN ('Geodude', 'Onix');
+--Kiểm tra
+SELECT TenPokemon, MaNoiTai
+FROM Pokemon
+WHERE TenPokemon IN ('Geodude', 'Onix');
+
+--19.Xóa hệ không có pokemon nào 
+DELETE FROM He
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Pokemon_He
+    WHERE He.MaHe = Pokemon_He.MaHe
+);
+
+--Kiểm tra
+SELECT * FROM He
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Pokemon_He
+    WHERE He.MaHe = Pokemon_He.MaHe
+);
+
+--20.Xóa những pokemon không thuộc sở hữu bởi nhà huấn luyện nào 
+DELETE FROM Pokemon_He
+WHERE MaPokemon NOT IN (
+    SELECT MaPokemon FROM PokeBall
+);
+DELETE FROM Pokemon_NoiTai
+WHERE MaPokemon NOT IN (
+    SELECT MaPokemon FROM PokeBall
+);
+DELETE FROM Pokemon
+WHERE MaPokemon NOT IN (
+    SELECT MaPokemon FROM PokeBall
+);
+--Kiểm tra
+SELECT * FROM Pokemon
+WHERE MaPokemon NOT IN (
+    SELECT MaPokemon FROM PokeBall
+);
+
