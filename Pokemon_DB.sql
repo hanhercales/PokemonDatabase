@@ -269,7 +269,7 @@ INSERT INTO Pokemon_He VALUES
 ('P020', 'HE007');
 
 -- =======================
--- BẢNG POKÉMON_NOITAI
+-- BẢNG POKÉMON_NoiTai
 -- =======================
 INSERT INTO Pokemon_NoiTai VALUES
 ('P001', 'NT001'),
@@ -311,36 +311,36 @@ INSERT INTO TienHoa VALUES
 ('P005', 'P025'); -- Eevee -> Vaporeon
 
 -- 1. Pokémon có CHISO > 60 --
-select * from POKEMON
-where CHISO > 60;
+select * from Pokemon
+where ChiSo > 60;
 
 -- 2. Chiêu thức có CHISO > 40 --
 select * from CHIEUTHUC
-where CHISO > 40;
+where ChiSo > 40;
 
 -- 3. Pokémon và hệ 'Electric' --
-select P.TENPOKEMON, H.TENHE
-from POKEMON P
-join POKEMON_HE PH on P.MAPOKEMON = PH.MAPOKEMON
-join HE H on PH.MAHE = H.MAHE
-where H.TENHE = 'Electric';
+select P.TenPokemon, H.TenHe
+from Pokemon P
+join Pokemon_He PH on P.MaPokemon = PH.MaPokemon
+join He H on PH.MaHe = H.MaHe
+where H.TenHe = 'Electric';
 
 -- 4. Pokémon có nội tại chứa 'Over' --
-select P.TENPOKEMON, N.TENNOITAI
-from POKEMON P
-join NOITAI N on P.MANOITAI = N.MANOITAI
-where N.TENNOITAI like '%Over%';
+select P.TenPokemon, N.TenNoiTai
+from Pokemon P
+join NoiTai N on P.MaNoiTai = N.MaNoiTai
+where N.TenNoiTai like '%Over%';
 
 -- 5. Huấn luyện viên có Pokémon độ hiếm >= 2 --
-select NHL.TENNHL, P.TENPOKEMON
-from NHAHUANLUYEN NHL
-join POKEBALL PB on NHL.MANHL = PB.MANHL
-join POKEMON P on PB.MAPOKEMON = P.MAPOKEMON
+select NHL.TenNHL, P.TenPokemon
+from NhaHuanLuyen NHL
+join PokeBall PB on NHL.MaNHL = PB.MaNHL
+join Pokemon P on PB.MaPokemon = P.MaPokemon
 where P.DOHIEM >= 2;
 
 -- 6. Đếm Pokémon theo độ hiếm (> 50) --
 select DOHIEM, count(*) as SOLUONG
-from POKEMON
+from Pokemon
 where CHISO > 50
 group by DOHIEM;
 
@@ -351,28 +351,28 @@ where CHISO >= 30
 group by CHISO;
 
 -- 8. Đếm Pokémon theo hệ, chỉ hiện hệ có >1 Pokémon --
-select H.TENHE, count(*) as SOLUONGPOKEMON
-from POKEMON_HE PH
-join HE H on PH.MAHE = H.MAHE
-group by H.TENHE
+select H.TenHe, count(*) as SOLUONGPokemon
+from Pokemon_He PH
+join HE H on PH.MaHe = H.MaHe
+group by H.TenHe
 having count(*) > 1;
 
 -- 9. Đếm Pokémon theo độ hiếm, chỉ hiện độ hiếm có >1 Pokémon --
 select DOHIEM, count(*) as SOLUONG
-from POKEMON
+from Pokemon
 where CHISO > 40
 group by DOHIEM
 having count(*) > 1;
 
 -- 10. Đếm Pokémon mỗi huấn luyện viên, chỉ hiện ai có >= 2 Pokémon --
-select NHL.TENNHL, count(*) as SOLUONGPOKEMON
-from NHAHUANLUYEN NHL
-join POKEBALL PB on NHL.MANHL = PB.MANHL
-group by NHL.TENNHL
+select NHL.TenNHL, count(*) as SOLUONGPokemon
+from NhaHuanLuyen NHL
+join PokeBall PB on NHL.MaNHL = PB.MaNHL
+group by NHL.TenNHL
 having count(*) >= 2;
 
 --11.Đếm số lượng Pokemon mà mỗi nhà huấn luyện đang sở hữu,chỉ hiện những người
---có Pokemon có độ hiếm từ 3 trở lên và sắp xếp theo thứ tự tổng số pokemon giảm dần 
+--có Pokemon có độ hiếm từ 3 trở lên và sắp xếp theo thứ tự tổng số Pokemon giảm dần 
 SELECT 
     n.TenNHL AS 'Nhà huấn luyện',
     COUNT(CASE WHEN p.DoHiem >= 3 THEN 1 END) AS 'Số Pokemon hiếm',
@@ -407,7 +407,7 @@ VALUES ('HE011', 'Normal');
 --Kiểm tra 
 SELECT * FROM He;
 
---15.Update hệ 1 số pokemon thuộc hệ thường 
+--15.Update hệ 1 số Pokemon thuộc hệ thường 
 DELETE FROM Pokemon_He
 WHERE MaPokemon = 'P005' AND MaHe = 'HE006';
 UPDATE Pokemon_He
@@ -448,7 +448,7 @@ SELECT TenPokemon, MaNoiTai
 FROM Pokemon
 WHERE TenPokemon IN ('Geodude', 'Onix');
 
---19.Xóa hệ không có pokemon nào 
+--19.Xóa hệ không có Pokemon nào 
 DELETE FROM He
 WHERE NOT EXISTS (
     SELECT 1
@@ -464,7 +464,7 @@ WHERE NOT EXISTS (
     WHERE He.MaHe = Pokemon_He.MaHe
 );
 
---20.Xóa những pokemon không thuộc sở hữu bởi nhà huấn luyện nào 
+--20.Xóa những Pokemon không thuộc sở hữu bởi nhà huấn luyện nào 
 DELETE FROM Pokemon_He
 WHERE MaPokemon NOT IN (
     SELECT MaPokemon FROM PokeBall
